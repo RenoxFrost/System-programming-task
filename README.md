@@ -2,59 +2,49 @@
 
 Course work for Systems Programming (PITa-25-NL-EN) - 2026 Autumn.
 
-The application reads student records (first name, surname, homework results
-and an exam result), calculates the final points of every student, sorts them
-and divides them into two groups: "failed" and "passed".
-
 ## Points calculation formula
 
     final = 0.4 * homework + 0.6 * exam
 
-where `homework` is either the average or the median of all homework grades,
-chosen by the user. Grades are integers in the range 1..10 and the final
-result is printed with two decimal places. A student with fewer than 5.00
-points has failed the subject.
+`homework` is the average or the median of all homework grades, chosen by the
+user. A student with fewer than 5.00 points has failed the subject.
 
-## Release v0.1 - Task Nr. 1
+## Releases
 
-* class `Person`: first name, surname, homework results, exam result and the
-  final grade stored inside the object;
-* the rule of three written out explicitly - copy constructor,
-  copy-assignment operator, destructor;
-* data input through the overloaded `operator>>`, data output through the
-  overloaded `operator<<`;
-* the final grade can be calculated from the **average** or from the
-  **median** of the homework results, and the chosen method is shown in the
-  output;
-* the number of homework results does not have to be known in advance: the
-  user ends the list by entering `0`, and the grades are kept in a
-  `std::vector`;
-* reading records from `Students.txt`, output sorted by name and formatted
-  into columns.
+### v0.1 - Task Nr. 1
+Single `main.cpp`. Class `Person` with the rule of three, overloaded `>>` and
+`<<`, average and median based final grade, unknown number of homework results
+kept in a `std::vector`, reading `Students.txt`, sorted and formatted output.
+
+### v0.2 - Task Nr. 2 (this release)
+* the single file was split into units: `person`, `fileio`, `processing`,
+  `generator`, `timer`, `exceptions` - every class and new data type now lives
+  in its own header with a matching `*.cpp`;
+* error handling through an exception hierarchy
+  (`AppError` -> `FileError`, `ParseError`, `InvalidGradeError`,
+  `EmptyDataError`): a missing file, a line without grades or a grade outside
+  `1..10` throws instead of silently producing wrong output;
+* random student files can be generated with 10 000, 100 000, 1 000 000 and
+  10 000 000 records, using `<random>` (`std::mt19937`) and the default names
+  `Name1 Surname1`, `Name2 Surname2`, ...;
+* the students are divided into **failed** (final points < 5.00) and
+  **passed** (>= 5.00) and written into two separate files;
+* every stage - reading, sorting, splitting, writing - is measured separately
+  with `<chrono>`.
+
+The container used in this release is `std::vector` only.
 
 ## Build and run
 
 ```bash
-g++ -std=c++17 -O2 -Wall -Wextra -o students main.cpp
-./students
+make          # builds bin/students
+./bin/students
 ```
 
-Menu option **2** reads `Students.txt`, option **5** prints the table using one
-chosen calculation method.
+Menu option **1** generates the test files, option **4** runs the whole
+pipeline on one file and prints the time of every stage.
 
-## Input file format
+## Next release
 
-```
-Name        Surname    HW1   HW2   HW3   HW4   HW5   Exam
-Vardas1     Pavarde1     8     9    10     6    10      9
-Vardas2     Pavarde2     7    10     8     5     4      6
-```
-
-The header line is optional and the number of `HW` columns is free - the last
-number in a line is always taken as the exam result.
-
-## Planned releases
-
-* v0.2  - multi-file project, exceptions, random data files, failed / passed split, timing
-* v0.25 - the same pipeline with std::vector, std::list and std::deque
-* v1.0  - both splitting strategies, `<algorithm>` based implementation, make + cmake
+v0.25 - the same pipeline turned into a template so that `std::vector`,
+`std::list` and `std::deque` can be compared on identical data.
