@@ -1,27 +1,21 @@
 // =============================================================================
-//  Systems Programming - Task Nr. 2, release v0.2
-//
-//  What changed since v0.1
-//    * the single main.cpp was split into *.h / *.cpp units;
-//    * every error path now throws a typed exception (see exceptions.h);
-//    * random student files can be generated (10k, 100k, 1M, 10M records);
-//    * students are divided into "failed" (< 5.00) and "passed" (>= 5.00)
-//      and written into two separate files;
-//    * every stage of the run is timed with <chrono>.
-//
-//  Container used in this release: std::vector only.
+//  Systems Programming - Task Nr. 2, release v0.25
+//  Same program as v0.2, but the whole pipeline is a template, so the very
+//  same code runs with std::vector, std::list and std::deque and the three
+//  containers can be compared on identical data.
 // =============================================================================
 
+#include "benchmark.h"
 #include "exceptions.h"
 #include "fileio.h"
 #include "generator.h"
 #include "person.h"
 #include "processing.h"
-#include "timer.h"
 
-#include <iomanip>
+#include <deque>
 #include <iostream>
 #include <limits>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -70,40 +64,20 @@ void menuGenerate() {
     }
 }
 
-/// read -> sort -> split -> write, with every stage measured separately.
-void menuProcessFile() {
+void menuOneContainer() {
     const std::string path = readLine("Input file [students10000.txt]: ", "students10000.txt");
+    std::cout << "Container: 1) std::vector  2) std::list  3) std::deque\n";
+    const int container = readInt("Your choice [1]: ", 1);
 
-    std::vector<Person> all;
-    std::vector<Person> failed;
-    std::vector<Person> passed;
-
-    Timer timer;
-    readStudents(path, all);
-    const double tRead = timer.seconds();
-
-    timer.reset();
-    sortByPoints(all, g_mode);
-    const double tSort = timer.seconds();
-
-    timer.reset();
-    splitStudents(all, failed, passed, g_mode);
-    const double tSplit = timer.seconds();
-
-    timer.reset();
-    writeStudents("failed.txt", failed, g_mode);
-    writeStudents("passed.txt", passed, g_mode);
-    const double tWrite = timer.seconds();
-
-    std::cout << std::fixed << std::setprecision(4)
-              << "\nRecords : " << all.size()
-              << "\n  read  : " << tRead  << " s"
-              << "\n  sort  : " << tSort  << " s"
-              << "\n  split : " << tSplit << " s"
-              << "\n  write : " << tWrite << " s"
-              << "\n  TOTAL : " << tRead + tSort + tSplit + tWrite << " s"
-              << "\n\nfailed: " << failed.size() << " -> failed.txt"
-              << "\npassed: " << passed.size() << " -> passed.txt\n";
+    Result result;
+    switch (container) {
+    case 2:  result = runPipeline<std::list<Person>>(path, g_mode, "out_list");   break;
+    case 3:  result = runPipeline<std::deque<Person>>(path, g_mode, "out_deque"); break;
+    default: result = runPipeline<std::vector<Person>>(path, g_mode, "out_vector"); break;
+    }
+    printResultHeader();
+    printResult(result);
+    std::cout << "\nfailed: " << result.failed << "   passed: " << result.passed << '\n';
 }
 
 } // namespace
@@ -112,11 +86,11 @@ int main() {
     std::ios::sync_with_stdio(false);
 
     while (true) {
-        std::cout << "\n===== Student points analyzer  v0.2 =====\n"
+        std::cout << "\n===== Student points analyzer  v0.25 =====\n"
                   << "1. Generate random test files\n"
                   << "2. Read a file and show the table\n"
-                  << "3. Enter students from the keyboard\n"
-                  << "4. Process a file: sort, split, write two files, measure time\n"
+                  << "3. Process one file with a chosen container\n"
+                  << "4. Compare all three containers on one file\n"
                   << "5. Change the final grade mode (now: "
                   << (g_mode == GradeMode::Average ? "average" : "median") << ")\n"
                   << "0. Exit\n"
@@ -136,20 +110,14 @@ int main() {
                 printTable(students);
                 break;
             }
-            case 3: {
-                const int n = readInt("How many students? ", 0);
-                std::vector<Person> students;
-                for (int i = 0; i < n; ++i) {
-                    std::cout << "\nStudent " << i + 1 << ":\n";
-                    Person person;
-                    std::cin >> person;
-                    students.push_back(person);
-                }
-                sortAlphabetically(students);
-                printTable(students);
+            case 3: menuOneContainer(); break;
+            case 4: {
+                const std::string path = readLine("Input file [students10000.txt]: ",
+                                                  "students10000.txt");
+                printResultHeader();
+                runAllContainers(path, g_mode);
                 break;
             }
-            case 4: menuProcessFile(); break;
             case 5:
                 std::cout << "1) average  2) median: ";
                 g_mode = (readInt("", 1) == 2) ? GradeMode::Median : GradeMode::Average;
