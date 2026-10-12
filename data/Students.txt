@@ -1,0 +1,6 @@
+Name        Surname    HW1   HW2   HW3   HW4   HW5   Exam
+Vardas1     Pavarde1     8     9    10     6    10      9
+Vardas2     Pavarde2     7    10     8     5     4      6
+Ahmad       Raza         9     9     7    10     8     10
+Jonas       Jonaitis     4     5     3     6     5      4
+Egle        Eglute      10    10    10     9    10      9
