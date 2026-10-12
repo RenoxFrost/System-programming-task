@@ -1,0 +1,22 @@
+# build output
+build/
+bin/
+cmake-build-*/
+*.o
+*.d
+*.exe
+*.out
+
+# generated data and results
+students[0-9]*.txt
+out_*.txt
+manual_*.txt
+benchmark_results.md
+
+# IDE / editor noise
+.vscode/
+.idea/
+.vs/
+*.user
+*.suo
+.DS_Store
