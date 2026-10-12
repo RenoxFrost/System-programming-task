@@ -16,7 +16,7 @@ Single `main.cpp`. Class `Person` with the rule of three, overloaded `>>` and
 `<<`, average and median based final grade, unknown number of homework results
 kept in a `std::vector`, reading `Students.txt`, sorted and formatted output.
 
-### v0.2 - Task Nr. 2 (this release)
+### v0.2 - Task Nr. 2
 * the single file was split into units: `person`, `fileio`, `processing`,
   `generator`, `timer`, `exceptions` - every class and new data type now lives
   in its own header with a matching `*.cpp`;
@@ -32,7 +32,17 @@ kept in a `std::vector`, reading `Students.txt`, sorted and formatted output.
 * every stage - reading, sorting, splitting, writing - is measured separately
   with `<chrono>`.
 
-The container used in this release is `std::vector` only.
+The container used in that release was `std::vector` only.
+
+### v0.25 - Task Nr. 2 (this release)
+* the whole pipeline - reading, sorting, splitting, writing - became a
+  template over the container type, so exactly the same code runs with
+  `std::vector<Person>`, `std::list<Person>` and `std::deque<Person>`;
+* one detail needed special handling: `std::list` has no random access
+  iterators, so `std::sort` cannot be used on it and its own member `sort()`
+  is called instead, selected at compile time with `if constexpr`;
+* the menu can run one chosen container, or all three one after another on the
+  same file, and prints a comparison table of the measured times.
 
 ## Build and run
 
@@ -41,10 +51,11 @@ make          # builds bin/students
 ./bin/students
 ```
 
-Menu option **1** generates the test files, option **4** runs the whole
-pipeline on one file and prints the time of every stage.
+Menu option **1** generates the test files, option **3** runs one chosen
+container, option **4** compares all three on the same file.
 
 ## Next release
 
-v0.25 - the same pipeline turned into a template so that `std::vector`,
-`std::list` and `std::deque` can be compared on identical data.
+v1.0 - both splitting strategies selectable from the menu, a second
+implementation written with the `<algorithm>` library, `Makefile` and
+`CMakeLists.txt`, and the measured results written up in the README.
